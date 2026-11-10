@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SI-RT ONLINE - Sistem Informasi RT</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- FontAwesome Icon CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script>
+// Web App URL dari Deployment Apps Script
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhUzBWM-GpNulbIz8xc2e9tlKtSwCFCqopzxPE9uyKu-qy2qqToj9-0saoMq88mEhf/exec";
+const LOGO_RT = "https://cdn.phototourl.com/member/2026-10-28-7f0af827-b0da-42e5-b815-bc3b50807298.png";
+const LOGO_SEKOLAH = "https://cdn.phototourl.com/member/2026-10-28-7ab5ca46-84b8-483f-944f-b1d40c7ede04.png";
+</script>
+
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      colors: {
+        navy: {
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#080d1a',
+        },
+        brand: {
+          blue: '#2563eb',
+          hover: '#1d4ed8'
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@media print {
+  header, footer, nav, .no-print, button, .tab-btn, .theme-controls { display: none !important; }
+  body { background: white !important; color: black !important; padding-bottom: 0 !important; }
+  .print-only { display: block !important; }
+  .printable-area { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+}
+</style>
+</head>
+<body id="appBody" class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white pb-20 md:pb-0">
+
+<!-- Modal Autentikasi -->
+<div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-md w-full p-8 border border-slate-100 dark:border-slate-700 overflow-y-auto max-h-[90vh]">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-50 dark:bg-slate-700 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-600 mb-3 overflow-hidden p-1">
+        <img src="https://cdn.phototourl.com/member/2026-10-28-7f0af827-b0da-42e5-b815-bc3b50807298.png" alt="Logo RT" class="w-full h-full object-contain">
+      </div>
+      <h2 id="authTitle" class="text-2xl font-extrabold text-slate-900 dark:text-white">SI-RT ONLINE</h2>
+      <p id="authSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Sistem Informasi Manajemen Warga & Administrasi RT</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Username / Akun</label>
+        <input type="text" id="loginUser" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-xs bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Masukkan username">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+        <input type="password" id="loginPass" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-xs bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Masukkan password">
+      </div>
+      <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition duration-200 text-xs">
+        Masuk Sistem RT
+      </button>
+      <div class="text-center mt-4 text-xs text-slate-600 dark:text-slate-400">
+        Belum memiliki akun warga? <button type="button" onclick="toggleAuthMode('register')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">Daftar Akun!</button>
+      </div>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" class="space-y-4 hidden" onsubmit="handleRegister(event)">
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Nama Lengkap</label>
+        <input type="text" id="regName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-xs bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Nama Lengkap">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Username Baru</label>
+        <input type="text" id="regUser" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-xs bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Username">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+        <input type="password" id="regPass" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-600 focus:outline-none text-xs bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Password">
+      </div>
+      <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition duration-200 text-xs">
+        Daftar Sebagai Warga (Akses Terbatas)
+      </button>
+      <div class="text-center mt-4 text-xs text-slate-600 dark:text-slate-400">
+        Sudah memiliki akun? <button type="button" onclick="toggleAuthMode('login')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">Masuk!</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Header Utama -->
+<header id="mainHeader" class="bg-navy-900 text-white shadow-lg sticky top-0 z-30 hidden">
+<div class="max-w-6xl mx-auto px-4 py-3 sm:px-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-1 shadow-md overflow-hidden">
+        <img src="https://cdn.phototourl.com/member/2026-10-28-7f0af827-b0da-42e5-b815-bc3b50807298.png" alt="Logo RT" class="w-full h-full object-contain">
+      </div>
+      <div>
+        <h1 class="text-lg font-extrabold tracking-tight text-white leading-tight">SI-RT ONLINE</h1>
+        <p class="text-[10px] text-slate-400 font-medium">Sistem Informasi RT & Siskamling Digital</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center space-x-2 text-xs border-r border-slate-700 pr-3 mr-1">
+        <span id="currentUserNameText" class="font-bold text-white">Administrator</span>
+        <span id="currentUserRoleBadge" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-600 text-white tracking-wider">ADMIN</span>
+      </div>
+
+      <button onclick="toggleDarkMode()" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl border border-slate-700 transition" title="Ubah Tema Gelap/Terang">
+        <i id="themeIcon" class="fa-solid fa-moon"></i>
+      </button>
+      
+      <div class="relative">
+        <button onclick="toggleNotifDropdown()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition relative">
+          <i class="fa-regular fa-bell text-sm"></i>
+          <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-navy-900"></span>
+        </button>
+        <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50">
+          <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white">Notifikasi RT & Pengumuman</h4>
+            <button onclick="requestNotificationPermission()" class="text-[11px] text-blue-600 dark:text-blue-400 font-bold hover:underline">
+              <i class="fa-solid fa-mobile-screen mr-1"></i>Aktifkan HP
+            </button>
+          </div>
+          <div id="notifList" class="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 text-xs text-slate-600 dark:text-slate-300">
+            <div class="p-4 text-center text-slate-400">Belum ada notifikasi baru</div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="syncData()" class="p-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-semibold rounded-xl border border-slate-700 transition" title="Sync Data">
+        <i class="fa-solid fa-rotate text-sm" id="syncIcon"></i>
+      </button>
+      <button onclick="handleLogout()" class="p-2 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl border border-rose-800/50 transition" title="Keluar">
+        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+      </button>
+    </div>
+  </div>
+</div>
+</header>
+
+<!-- Konten Utama Aplikasi -->
+<main id="mainAppContent" class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex-grow w-full hidden">
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3 no-print">
+  <div>
+    <h2 class="text-lg font-bold text-slate-800 dark:text-white" id="sectionPageTitle">Data Keluarga & Anggota KK</h2>
+    <p class="text-xs text-slate-500 dark:text-slate-400">Sistem Pengelolaan Kependudukan, Keuangan, Persuratan dan Kegiatan RT</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="bg-blue-50 dark:bg-slate-700 text-blue-800 dark:text-blue-300 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-slate-600 text-xs font-mono font-semibold flex items-center gap-2">
+      <span>Waktu Sistem:</span>
+      <span id="liveSystemClock" class="font-bold">--/--/----, --:--:-- WIB</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 1. KELUARGA & KK ================= -->
+<section id="page-keluarga" class="space-y-6">
+  <div id="readOnlyNoticeBanner" class="hidden bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl text-amber-900 dark:text-amber-200 text-xs flex items-center gap-3">
+    <i class="fa-solid fa-eye text-amber-600 dark:text-amber-400 text-lg"></i>
+    <div>
+      <p class="font-bold">Mode Warga (Akses Terbatas / Read-Only)</p>
+      <p class="text-[11px] text-amber-700 dark:text-amber-300">Untuk menjaga privasi data warga, nomor NIK KK dan NIK Anggota disensor secara otomatis. Edit dan Hapus data hanya dapat dilakukan oleh Administrator.</p>
+    </div>
+  </div>
+
+  <div class="admin-only bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex items-center space-x-2 text-blue-600 dark:text-blue-400 font-bold text-base">
+      <i class="fa-solid fa-user-plus text-lg"></i>
+      <h3>Tambah Kartu Keluarga & Kepala Keluarga Baru</h3>
+    </div>
+    <form onsubmit="handleCreateKKSubmit(event)" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">NIK KK (Nomor Kartu Keluarga)</label>
+          <input type="text" id="newNikKk" maxlength="16" required placeholder="16 Digit NIK/No. KK" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Kepala Keluarga</label>
+          <input type="text" id="newNamaKepala" required placeholder="Nama Lengkap Kepala Keluarga" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Alamat Lengkap</label>
+          <input type="text" id="newAlamat" required placeholder="Jl. Mawar No. X, RT 01 / RW 02" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+        </div>
+      </div>
+
+      <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-3">
+        <p class="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wide"><i class="fa-solid fa-address-card mr-1"></i> Data Detail Kepala Keluarga (Sebagai Anggota Pertama)</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Tempat, Tanggal Lahir (TTL)</label>
+            <input type="text" id="newKepalaTtl" required placeholder="Contoh: Malang, 12-05-1980" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Jenis Kelamin</label>
+            <select id="newKepalaJk" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Pendidikan Terakhir</label>
+            <input type="text" id="newKepalaPendidikan" required placeholder="SMA / S1 / S2 / Sederajat" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition">
+          <i class="fa-solid fa-save mr-1"></i> Simpan Data KK
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="relative">
+    <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+    <input type="text" id="searchKKInput" onkeyup="filterKKList()" placeholder="Cari berdasarkan Nama Kepala Keluarga atau NIK KK..." class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs focus:outline-none focus:border-blue-600 shadow-sm transition">
+  </div>
+
+  <div id="keluargaGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Diisi secara dinamis -->
+  </div>
+</section>
+
+<!-- ================= 2. JADWAL RONDA & INFO ================= -->
+<section id="page-ronda" class="hidden space-y-6">
+  <div class="bg-gradient-to-r from-slate-900 via-navy-900 to-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-md space-y-5">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/30 border border-blue-500/40 flex items-center justify-center p-1">
+          <i class="fa-solid fa-bullhorn text-blue-400 text-lg"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-base text-white">PAPAN INFORMASI & PENGUMUMAN RT</h3>
+          <p class="text-[11px] text-slate-400">Pusat Suara Informasi Digital & Pengumuman Kustom Warga</p>
+        </div>
+      </div>
+      <span class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-[10px] font-bold">
+        <i class="fa-solid fa-broadcast-tower mr-1"></i> Suara Informasi RT
+      </span>
+    </div>
+
+    <!-- Form Buat & Edit Info (Admin Only) -->
+    <div class="admin-only bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 space-y-3">
+      <div class="flex items-center justify-between">
+        <h4 id="formPengumumanHeader" class="font-bold text-xs text-blue-400 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square"></i> Buat & Terbitkan Informasi Custom Baru
+        </h4>
+        <span class="text-[10px] text-slate-400">Siarkan Pengumuman ke Warga</span>
+      </div>
+      <form onsubmit="handleSavePengumumanSubmit(event)" class="space-y-3">
+        <input type="hidden" id="editInfoId">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-300 mb-1">Judul Informasi / Pengumuman</label>
+            <input type="text" id="infoJudul" required placeholder="Contoh: Kerja Bakti Massal / Posyandu Balita" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-300 mb-1">Kategori Informasi</label>
+            <select id="infoKategori" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500">
+              <option value="Pengumuman Umum">Pengumuman Umum</option>
+              <option value="Keamanan Lingkungan">Keamanan Lingkungan</option>
+              <option value="Kerja Bakti & Kebersihan">Kerja Bakti & Kebersihan</option>
+              <option value="Kesehatan & Posyandu">Kesehatan & Posyandu</option>
+              <option value="Darurat / Important">Darurat / Important</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1">Isi Pesan Informasi Lengkap</label>
+          <textarea id="infoIsi" rows="2" required placeholder="Tulis rincian pesan informasi secara custom yang ingin disampaikan kepada seluruh warga..." class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="btnCancelInfo" onclick="resetPengumumanForm()" class="hidden px-4 py-2 bg-slate-700 text-slate-300 font-bold rounded-xl text-xs">
+            Batal Edit
+          </button>
+          <button type="submit" id="btnSubmitInfo" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane text-xs"></i> Siarkan Informasi Sekarang
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Grid List Pengumuman -->
+    <div id="pengumumanGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Diisi secara dinamis -->
+    </div>
+  </div>
+
+  <!-- Jadwal Ronda Siskamling -->
+  <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
+      <div>
+        <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-blue-600 dark:text-blue-400"></i> Jadwal Ronda Siskamling Warga
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Pengaturan Pos Jaga, Custom Jam/Waktu, Petugas, serta Manajemen Pengganti</p>
+      </div>
+      <button onclick="openAddRondaModal()" class="admin-only px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-plus text-xs"></i> Tambah Jadwal Ronda
+      </button>
+    </div>
+    <div id="rondaGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Diisi secara dinamis -->
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3. INPUT KEGIATAN & KAS ================= -->
+<section id="page-inputkas" class="hidden space-y-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Form Agenda Kegiatan -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+      <div class="flex items-center space-x-2 text-blue-600 dark:text-blue-400 font-bold text-base border-b border-slate-100 dark:border-slate-700 pb-3">
+        <i class="fa-solid fa-calendar-days text-lg"></i>
+        <h3 id="formKegiatanHeader">Input Agenda Kegiatan RT</h3>
+      </div>
+      <form onsubmit="handleSaveKegiatanSubmit(event)" class="space-y-3">
+        <input type="hidden" id="editKegiatanId">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Judul Agenda Kegiatan</label>
+          <input type="text" id="kegiatanJudul" required placeholder="Contoh: Kerja Bakti / Rapat Pleno Warga" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tanggal Pelaksanaan</label>
+            <input type="date" id="kegiatanTanggal" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Status Perizinan</label>
+            <select id="kegiatanStatus" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+              <option value="Disetujui RT">Disetujui RT</option>
+              <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+              <option value="Selesai Dilaksanakan">Selesai Dilaksanakan</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Keterangan / Detail Kegiatan</label>
+          <textarea id="kegiatanKeterangan" rows="2" required placeholder="Catatan atau deskripsi kegiatan..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="btnCancelKegiatan" onclick="resetKegiatanForm()" class="hidden px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">
+            Batal
+          </button>
+          <button type="submit" id="btnSubmitKegiatan" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+            <i class="fa-solid fa-plus mr-1"></i> Tambah Agenda Kegiatan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Form Transaksi Kas -->
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+      <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold text-base border-b border-slate-100 dark:border-slate-700 pb-3">
+        <i class="fa-solid fa-wallet text-lg"></i>
+        <h3 id="formKasHeader">Input Transaksi Kas Warga</h3>
+      </div>
+      <form onsubmit="handleSaveKasSubmit(event)" class="space-y-3">
+        <input type="hidden" id="editKasId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
+            <input type="date" id="kasTanggal" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tipe Transaksi</label>
+            <select id="kasTipe" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+              <option value="pemasukan">Pemasukan Kas</option>
+              <option value="pengeluaran">Pengeluaran Kas</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nominal (Rp)</label>
+            <input type="number" id="kasNominal" min="0" required placeholder="Contoh: 50000" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Pembayar / Penerima</label>
+            <input type="text" id="kasPembayar" required placeholder="Bapak Budi / Toko Berkah" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Keterangan Transaksi</label>
+          <textarea id="kasKeterangan" rows="2" required placeholder="Iuran Wajib Bulanan RT / Pembelian Bola Lampu" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:border-blue-600"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="btnCancelKas" onclick="resetKasForm()" class="hidden px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">
+            Batal
+          </button>
+          <button type="submit" id="btnSubmitKas" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+            <i class="fa-solid fa-save mr-1"></i> Catat Transaksi Kas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Daftar Agenda Kegiatan RT</h3>
+      <span class="text-xs text-slate-500 dark:text-slate-400">Daftar Agenda Terjadwal</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+            <th class="p-3">Tanggal</th>
+            <th class="p-3">Agenda Kegiatan</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Keterangan</th>
+            <th class="p-3 text-right admin-only">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableKegiatanBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+          <!-- Diisi secara dinamis -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4. LAPORAN KEUANGAN KAS ================= -->
+<section id="page-laporankas" class="hidden space-y-6">
+  <div class="printable-area bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+      <div>
+        <h3 class="text-xl font-extrabold text-slate-900 dark:text-white uppercase">Laporan Keuangan Kas Rukun Tetangga</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rekapitulasi Saldo, Pemasukan, dan Pengeluaran Resmi RT</p>
+      </div>
+      <div class="flex items-center gap-2 no-print">
+        <button onclick="window.print()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i> Cetak Laporan (Siap Print)
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 p-4 rounded-2xl shadow-xs">
+        <div class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Total Pemasukan</div>
+        <div id="statTotalMasuk" class="text-xl font-extrabold text-emerald-800 dark:text-emerald-300 mt-1">Rp 0</div>
+      </div>
+      <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 p-4 rounded-2xl shadow-xs">
+        <div class="text-[11px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Total Pengeluaran</div>
+        <div id="statTotalKeluar" class="text-xl font-extrabold text-rose-800 dark:text-rose-300 mt-1">Rp 0</div>
+      </div>
+      <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl shadow-xs">
+        <div class="text-[11px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Saldo Kas Saat Ini</div>
+        <div id="statSaldoAkhir" class="text-xl font-extrabold text-blue-900 dark:text-blue-300 mt-1">Rp 0</div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+            <th class="p-3">Tanggal</th>
+            <th class="p-3">Keterangan</th>
+            <th class="p-3">Pembayar / Penerima</th>
+            <th class="p-3 text-right">Pemasukan (Rp)</th>
+            <th class="p-3 text-right">Pengeluaran (Rp)</th>
+            <th class="p-3 text-right no-print admin-only">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableLaporanKasBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+          <!-- Diisi secara dinamis -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. UNDANGAN DIGITAL ================= -->
+<section id="page-undangan" class="hidden space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm no-print">
+    <div>
+      <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Pembuat Surat Undangan Digital Resmi RT</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Kustomisasi format surat rapat atau acara warga yang siap cetak dan bagikan</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openUndanganModal()" class="admin-only px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-plus font-bold"></i> Surat Baru
+      </button>
+      <button onclick="window.print()" class="px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-print"></i> Cetak Surat
+      </button>
+    </div>
+  </div>
+
+  <div id="suratPreviewContainer" class="space-y-6">
+    <!-- Diisi secara dinamis -->
+  </div>
+</section>
+
+<!-- ================= 6. SURAT PENGAJUAN ================= -->
+<section id="page-pengajuan" class="hidden space-y-6">
+  <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <div>
+        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Surat Pengajuan Warga</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Layanan Permohonan Surat Pengantar RT / Keterangan Warga</p>
+      </div>
+      <button onclick="openPengajuanModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-plus"></i> Buat Pengajuan
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+            <th class="p-3">Tanggal</th>
+            <th class="p-3">Nama Pemohon</th>
+            <th class="p-3">NIK</th>
+            <th class="p-3">Jenis Surat</th>
+            <th class="p-3">Keperluan</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tablePengajuanBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+          <!-- Diisi secara dinamis -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7. SURAT IZIN ================= -->
+<section id="page-izin" class="hidden space-y-6">
+  <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <div>
+        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Surat Izin RT / Lingkungan</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Pengajuan Izin Acara, Keramaian, atau Penggunaan Fasilitas Umum RT</p>
+      </div>
+      <button onclick="openIzinModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-plus"></i> Ajukan Permohonan Izin
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+            <th class="p-3">Nama Pemohon</th>
+            <th class="p-3">Jenis Izin</th>
+            <th class="p-3">Alasan / Detail</th>
+            <th class="p-3">Tanggal Pelaksanaan</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableIzinBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+          <!-- Diisi secara dinamis -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 8. KELOLA AKSES AKUN ================= -->
+<section id="page-users" class="hidden space-y-6">
+  <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <div>
+        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Manajemen Akses & Hak Pengguna Akun (Warga & Admin)</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Ubah hak akses warga terdaftar menjadi Administrator atau pertahankan sebagai Warga</p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+            <th class="p-3">Nama Lengkap</th>
+            <th class="p-3">Username</th>
+            <th class="p-3">Role / Hak Akses</th>
+            <th class="p-3 text-right">Aksi / Ubah Role</th>
+          </tr>
+        </thead>
+        <tbody id="tableUsersBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+          <!-- Diisi secara dinamis -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 9. HALAMAN ABOUT ================= -->
+<section id="page-about" class="hidden space-y-6">
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-6 max-w-3xl mx-auto text-center">
+    <div class="flex justify-center items-center gap-4">
+      <div class="w-24 h-24 rounded-2xl bg-slate-50 dark:bg-slate-700 p-2 border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-md">
+        <img src="https://cdn.phototourl.com/member/2026-10-28-daa42bd9-3f92-4b1f-8bbd-3191269a7be3.png" alt="Logo SMAs Diponegoro Tumpang" class="max-h-full max-w-full object-contain rounded-xl">
+      </div>
+      <div class="w-24 h-24 rounded-2xl bg-slate-50 dark:bg-slate-700 p-2 border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-md">
+        <img src="https://cdn.phototourl.com/member/2026-10-28-7f0af827-b0da-42e5-b815-bc3b50807298.png" alt="Logo RT" class="max-h-full max-w-full object-contain">
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Sistem Informasi RT (SI-RT ONLINE)</h3>
+      <div class="w-16 h-1 bg-blue-600 rounded-full mx-auto"></div>
+    </div>
+
+    <div class="bg-slate-50 dark:bg-slate-700/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm leading-relaxed space-y-4">
+      <p class="font-bold text-base text-blue-700 dark:text-blue-400">About / Tentang Aplikasi</p>
+      <p>
+        Dibuat oleh <strong>Ahmad Uzzuri Sifa & Bayu Burhanudin Yusuf XII-A</strong><br>
+        Siswa SMAs Diponegoro Tumpang dlm rangka menyelesaikan ujian praktik mata pelajaran informatika,
+      </p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Guru Informatika : <strong>Johan Andri Pratama, S.Kom,.Gr</strong><br>
+        Tahun Ajaran 2026-2027
+      </p>
+    </div>
+
+    <div class="text-xs text-slate-400 pt-2">
+      SMAs Diponegoro Tumpang &copy; 2026 - All Rights Reserved
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 no-print mb-16 md:mb-0">
+  Sistem Informasi RT Online & Siskamling Digital Warga Terpadu | SMAs Diponegoro Tumpang
+</footer>
+
+<!-- BOTTOM NAVIGATION BAR -->
+<nav id="bottomNavBar" class="fixed bottom-0 left-0 right-0 z-40 bg-navy-900/95 backdrop-blur-md text-slate-300 border-t border-slate-800 shadow-2xl no-print hidden">
+  <div class="max-w-6xl mx-auto px-2 py-1.5 flex items-center justify-around overflow-x-auto hide-scrollbar">
+    <button onclick="switchTab('keluarga')" id="tab-keluarga" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-brand-blue transition">
+      <i class="fa-solid fa-users text-base mb-1"></i>
+      <span class="truncate">Keluarga</span>
+    </button>
+    <button onclick="switchTab('ronda')" id="tab-ronda" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-shield-halved text-base mb-1"></i>
+      <span class="truncate">Jadwal Ronda</span>
+    </button>
+    <button onclick="switchTab('inputkas')" id="tab-inputkas" class="tab-btn admin-only min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-circle-plus text-base mb-1"></i>
+      <span class="truncate">Input Kas</span>
+    </button>
+    <button onclick="switchTab('laporankas')" id="tab-laporankas" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-file-invoice-dollar text-base mb-1"></i>
+      <span class="truncate">Laporan Kas</span>
+    </button>
+    <button onclick="switchTab('undangan')" id="tab-undangan" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-envelope-open-text text-base mb-1"></i>
+      <span class="truncate">Undangan</span>
+    </button>
+    <button onclick="switchTab('pengajuan')" id="tab-pengajuan" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-file-signature text-base mb-1"></i>
+      <span class="truncate">Pengajuan</span>
+    </button>
+    <button onclick="switchTab('izin')" id="tab-izin" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-hand text-base mb-1"></i>
+      <span class="truncate">Izin RT</span>
+    </button>
+    <button onclick="switchTab('users')" id="tab-users" class="tab-btn admin-only min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-user-gear text-base mb-1"></i>
+      <span class="truncate">Akses</span>
+    </button>
+    <button onclick="switchTab('about')" id="tab-about" class="tab-btn min-w-[64px] flex flex-col items-center py-1 px-2 rounded-xl text-[10px] font-semibold text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-circle-info text-base mb-1"></i>
+      <span class="truncate">About</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Modal Detail KK -->
+<div id="modalDetailKK" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto space-y-6 border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+      <div>
+        <h3 id="modalKkTitle" class="font-extrabold text-lg text-slate-900 dark:text-white">Detail Kartu Keluarga</h3>
+        <p id="modalKkSubtitle" class="text-xs text-slate-500 dark:text-slate-400">Alamat Lengkap: -</p>
+      </div>
+      <button onclick="closeModal('modalDetailKK')" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Form Edit Informasi Kartu Keluarga (Admin Only) -->
+    <div id="formEditKKContainer" class="admin-only hidden bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/50 space-y-3">
+      <h4 class="font-bold text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+        <i class="fa-solid fa-pen-to-square"></i> Edit Informasi Kartu Keluarga & Alamat
+      </h4>
+      <form onsubmit="handleUpdateKKSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <input type="hidden" id="editKkTargetOldNik">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">NIK KK / No. KK</label>
+          <input type="text" id="editKkNik" maxlength="16" required class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs dark:text-white">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Kepala Keluarga</label>
+          <input type="text" id="editKkNamaKepala" required class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs dark:text-white">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Alamat Lengkap</label>
+          <input type="text" id="editKkAlamat" required class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs dark:text-white">
+        </div>
+        <div class="sm:col-span-3 flex justify-end gap-2 pt-1">
+          <button type="button" onclick="toggleEditKKForm(false)" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">Batal</button>
+          <button type="submit" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shadow-md">Update Informasi KK</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Form Tambah / Edit Anggota Individu (Admin Only) -->
+    <div class="admin-only bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-3">
+      <h4 id="formAnggotaHeader" class="font-bold text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+        <i class="fa-solid fa-user-plus"></i> Tambah Anggota Keluarga / KTP Baru
+      </h4>
+      <form onsubmit="handleSaveAnggotaSubmit(event)" class="space-y-3">
+        <input type="hidden" id="targetNikKk">
+        <input type="hidden" id="editAnggotaId">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Lengkap (Sesuai KTP)</label>
+            <input type="text" id="anggotaNama" required placeholder="Contoh: Ahmad Subagja" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">NIK Individu (16 Digit KTP)</label>
+            <input type="text" id="anggotaNik" maxlength="16" required placeholder="3271..." class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Tempat, Tanggal Lahir (TTL)</label>
+            <input type="text" id="anggotaTtl" required placeholder="Kota, 01-01-2000" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Jenis Kelamin</label>
+            <select id="anggotaJk" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Pendidikan Terakhir</label>
+            <input type="text" id="anggotaPendidikan" required placeholder="SD / SMP / SMA / S1 / S2" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Peran dalam Keluarga</label>
+            <select id="anggotaPeran" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+              <option value="Ayah">Ayah</option>
+              <option value="Ibu">Ibu</option>
+              <option value="Anak">Anak</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Status Kependudukan</label>
+            <select id="anggotaStatus" class="w-full px-3 py-2 bg-white dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+              <option value="Aktif (Tinggal)">Aktif (Tinggal)</option>
+              <option value="Baru (Kelahiran)">Baru (Kelahiran)</option>
+              <option value="Pindah Domisili">Pindah Domisili</option>
+              <option value="Meninggal Dunia">Meninggal Dunia</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" id="btnCancelEditAnggota" onclick="resetAnggotaForm()" class="hidden px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">
+            Batal Edit
+          </button>
+          <button type="submit" id="btnSubmitAnggota" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+            Simpan Anggota Keluarga
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabel Anggota Keluarga -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h4 class="font-extrabold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wide">Daftar Anggota Keluarga Terdaftar</h4>
+        <button onclick="toggleEditKKForm(true)" class="admin-only text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-pencil"></i> Edit Alamat / KK
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-100 dark:bg-slate-700/60 border-b border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 uppercase font-extrabold text-[10px]">
+              <th class="p-2.5">Nama Anggota</th>
+              <th class="p-2.5">NIK (KTP)</th>
+              <th class="p-2.5">TTL</th>
+              <th class="p-2.5">JK</th>
+              <th class="p-2.5">Pendidikan</th>
+              <th class="p-2.5">Peran</th>
+              <th class="p-2.5">Status</th>
+              <th class="p-2.5 text-right admin-only">Aksi / Edit</th>
+            </tr>
+          </thead>
+          <tbody id="tableAnggotaBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+            <!-- Diisi secara dinamis -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ronda -->
+<div id="modalEditRonda" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <h3 id="modalRondaTitle" class="font-extrabold text-base text-slate-900 dark:text-white">Tambah / Edit Jadwal Ronda</h3>
+      <button onclick="closeModal('modalEditRonda')" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <form onsubmit="handleSaveRondaSubmit(event)" class="space-y-3">
+      <input type="hidden" id="editRondaId">
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Pos Ronda</label>
+        <input type="text" id="editRondaPos" required placeholder="Pos Jaga Utama / Pos RT 01" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Hari</label>
+          <input type="text" id="editRondaHari" required placeholder="Senin / Selasa / dst" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Jam / Waktu Jaga (Custom)</label>
+          <input type="text" id="editRondaWaktu" required placeholder="Contoh: 21.00 - 03.00 WIB" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Petugas Jaga</label>
+        <input type="text" id="editRondaPetugas" required placeholder="Bpk. Ahmad, Bpk. Budi, dll." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Petugas Pengganti (Opsional)</label>
+        <input type="text" id="editRondaPengganti" placeholder="Isi bila ada pengganti" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+        Simpan Jadwal Ronda
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Undangan -->
+<div id="modalUndangan" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <h3 id="modalUndanganTitle" class="font-extrabold text-base text-slate-900 dark:text-white">Format Surat Undangan Digital</h3>
+      <button onclick="closeModal('modalUndangan')" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <form onsubmit="handleSaveUndanganSubmit(event)" class="space-y-3">
+      <input type="hidden" id="editUndanganId">
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Kop Surat / Judul Instansi</label>
+        <input type="text" id="undanganKop" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nomor / Lampiran</label>
+          <input type="text" id="undanganNomor" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tanggal Surat</label>
+          <input type="text" id="undanganTanggal" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Kepada Yang Dituju</label>
+        <input type="text" id="undanganTujuan" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Isi Undangan / Agenda</label>
+        <textarea id="undanganIsi" rows="3" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Penandatangan (Ketua RT)</label>
+        <input type="text" id="undanganPenandatangan" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+        Simpan Format Surat
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Surat Pengajuan -->
+<div id="modalPengajuan" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Form Surat Pengajuan Warga</h3>
+      <button onclick="closeModal('modalPengajuan')" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <form onsubmit="handleSavePengajuanSubmit(event)" class="space-y-3">
+      <input type="hidden" id="pengajuanId">
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Pemohon</label>
+        <input type="text" id="pengajuanNama" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">NIK Pemohon</label>
+        <input type="text" id="pengajuanNik" maxlength="16" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Jenis Surat Pengajuan</label>
+        <select id="pengajuanJenis" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          <option value="Surat Pengantar KTP / KK">Surat Pengantar KTP / KK</option>
+          <option value="Surat Keterangan Domisili">Surat Keterangan Domisili</option>
+          <option value="Surat Keterangan Tidak Mampu">Surat Keterangan Tidak Mampu</option>
+          <option value="Surat Pengantar SKCK">Surat Pengantar SKCK</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Keperluan / Alasan</label>
+        <textarea id="pengajuanKeperluan" rows="3" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs"></textarea>
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+        Kirim Surat Pengajuan
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Surat Izin -->
+<div id="modalIzin" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+      <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Form Permohonan Surat Izin RT</h3>
+      <button onclick="closeModal('modalIzin')" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <form onsubmit="handleSaveIzinSubmit(event)" class="space-y-3">
+      <input type="hidden" id="izinId">
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Nama Pemohon / Penanggung Jawab</label>
+        <input type="text" id="izinNama" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Jenis Izin</label>
+        <select id="izinJenis" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+          <option value="Izin Keramaian / Acara">Izin Keramaian / Acara</option>
+          <option value="Izin Penggunaan Lapangan/Fasum">Izin Penggunaan Lapangan/Fasum</option>
+          <option value="Izin Renovasi / Bangunan">Izin Renovasi / Bangunan</option>
+          <option value="Izin Pos Ronda / Tenda">Izin Pos Ronda / Tenda</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tanggal Mulai</label>
+          <input type="date" id="izinTglMulai" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Tanggal Selesai</label>
+          <input type="date" id="izinTglSelesai" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Alasan / Detail Kegiatan</label>
+        <textarea id="izinAlasan" rows="3" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl text-xs"></textarea>
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+        Kirim Permohonan Izin
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+// State Aplikasi & Database
+let currentUser = null;
+let activeTab = 'keluarga';
+let isDarkMode = false;
+let dbData = {
+  keluarga: [],
+  ronda: [],
+  pengumuman: [],
+  kegiatan: [],
+  kas: [],
+  undangan: [],
+  pengajuan: [],
+  izin: [],
+  users: [
+    { id: '1', username: 'admin', password: 'admin123', role: 'admin', nama_lengkap: 'Administrator Utama' }
+  ]
+};
+
+// ===== Format Tanggal & Waktu Indonesia (WIB / Asia/Jakarta) =====
+const ZONA_WIB = 'Asia/Jakarta';
+function tglWIB(d) {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: ZONA_WIB, day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
+}
+function timeWIB(d) {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: ZONA_WIB, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(d);
+}
+function tglPanjangWIB(d) {
+  return new Intl.DateTimeFormat('id-ID', { timeZone: ZONA_WIB, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+}
+// Tampilan saja: data di database tidak diubah (format output: Contoh "Senin, 11 Oktober 2011")
+function fmtTgl(v) {
+  if (v === undefined || v === null || v === '') return '-';
+  const s = String(v).replace(/'/g, '').trim();
+
+  // Handle format ISO Date String (contoh: 2026-11-09T17:00:00.000Z)
+  const dtIso = new Date(s);
+  if (!isNaN(dtIso.getTime()) && (s.includes('T') || s.includes('Z'))) {
+    return new Intl.DateTimeFormat('id-ID', { timeZone: ZONA_WIB, weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(dtIso);
+  }
+
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);       // YYYY-MM-DD (input tanggal)
+  let y, mo, d;
+  if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+  else {
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);  // DD/MM/YYYY (tanggal otomatis WIB)
+    if (!m) return s || '-';
+    d = +m[1]; mo = +m[2]; y = +m[3];
+  }
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  const hari = new Intl.DateTimeFormat('id-ID', { timeZone: 'UTC', weekday: 'long' }).format(dt);
+  const bulan = new Intl.DateTimeFormat('id-ID', { timeZone: 'UTC', month: 'long' }).format(dt);
+  return hari + ', ' + String(d).padStart(2, '0') + ' ' + bulan + ' ' + y;   // contoh: Senin, 01 Januari 2001
+}
+
+// ===== Token sesi & kepemilikan data =====
+function getToken() {
+  return localStorage.getItem('sirt_token') || '';
+}
+// Warga hanya melihat surat yang owner_id-nya = id akun yang login
+function canViewOwned(item) {
+  if (!currentUser || currentUser.role !== 'warga') return true;
+  return String(item.owner_id || '').replace(/'/g, '') === String(currentUser.id);
+}
+
+// Inisialisasi Halaman
+window.onload = function() {
+  setInterval(updateSystemClock, 1000);
+
+  if (localStorage.getItem('sirt_theme') === 'dark') {
+    enableDarkMode(true);
+  }
+
+  const savedUser = localStorage.getItem('sirt_current_user');
+  if (savedUser && getToken()) {
+    currentUser = JSON.parse(savedUser);
+    initAppSession();
+    loadDatabase();
+  } else {
+    localStorage.removeItem('sirt_current_user');
+  }
+};
+
+function updateSystemClock() {
+  const now = new Date();
+  document.getElementById('liveSystemClock').innerText = tglPanjangWIB(now) + ' ' + timeWIB(now) + ' WIB';
+}
+
+function toggleDarkMode() {
+  enableDarkMode(!isDarkMode);
+}
+
+function enableDarkMode(enable) {
+  isDarkMode = enable;
+  const icon = document.getElementById('themeIcon');
+  if (isDarkMode) {
+    document.documentElement.classList.add('dark');
+    if (icon) icon.className = 'fa-solid fa-sun';
+    localStorage.setItem('sirt_theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    if (icon) icon.className = 'fa-solid fa-moon';
+    localStorage.setItem('sirt_theme', 'light');
+  }
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.add('hidden');
+}
+
+// Autentikasi
+function toggleAuthMode(mode) {
+  const loginF = document.getElementById('loginForm');
+  const regF = document.getElementById('registerForm');
+  const title = document.getElementById('authTitle');
+  const sub = document.getElementById('authSubtitle');
+
+  if (mode === 'register') {
+    loginF.classList.add('hidden');
+    regF.classList.remove('hidden');
+    title.innerText = 'Daftar Akun Warga';
+    sub.innerText = 'Buat akun untuk mengakses informasi dan layanan RT (Read-Only)';
+  } else {
+    loginF.classList.remove('hidden');
+    regF.classList.add('hidden');
+    title.innerText = 'SI-RT ONLINE';
+    sub.innerText = 'Sistem Informasi Manajemen Warga & Administrasi RT';
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', username: u, password: p })
+    });
+    const d = await res.json();
+    if (!d.success) {
+      alert(d.error || 'Username atau Password salah!');
+      return;
+    }
+    localStorage.setItem('sirt_token', d.token);
+    currentUser = d.user;
+    localStorage.setItem('sirt_current_user', JSON.stringify(currentUser));
+    initAppSession();
+    loadDatabase();
+    showNotification('Login Berhasil', 'Selamat datang kembali, ' + currentUser.nama_lengkap);
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const nama = document.getElementById('regName').value.trim();
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value.trim();
+
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'register', nama_lengkap: nama, username: u, password: p })
+    });
+    const d = await res.json();
+    if (!d.success) {
+      alert(d.error || 'Pendaftaran gagal.');
+      return;
+    }
+    alert('Pendaftaran akun warga berhasil! Silakan masuk.');
+    toggleAuthMode('login');
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+  }
+}
+
+function handleLogout() {
+  const token = getToken();
+  if (token && GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('http')) {
+    fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'logout', token: token }) }).catch(() => {});
+  }
+  localStorage.removeItem('sirt_token');
+  localStorage.removeItem('sirt_current_user');
+  currentUser = null;
+  document.getElementById('mainHeader').classList.add('hidden');
+  document.getElementById('bottomNavBar').classList.add('hidden');
+  document.getElementById('mainAppContent').classList.add('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+}
+
+function initAppSession() {
+  document.getElementById('authModal').classList.add('hidden');
+  document.getElementById('mainHeader').classList.remove('hidden');
+  document.getElementById('bottomNavBar').classList.remove('hidden');
+  document.getElementById('mainAppContent').classList.remove('hidden');
+  document.getElementById('currentUserNameText').innerText = currentUser.nama_lengkap;
+  document.getElementById('currentUserRoleBadge').innerText = String(currentUser.role).toUpperCase();
+
+  const isWarga = currentUser.role === 'warga';
+  const noticeBanner = document.getElementById('readOnlyNoticeBanner');
+
+  if (isWarga) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+    document.getElementById('tab-users').classList.add('hidden');
+    if (noticeBanner) noticeBanner.classList.remove('hidden');
+  } else {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    document.getElementById('tab-users').classList.remove('hidden');
+    if (noticeBanner) noticeBanner.classList.add('hidden');
+  }
+
+  switchTab('keluarga');
+  renderAll();
+}
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  const sections = ['keluarga', 'ronda', 'inputkas', 'laporankas', 'undangan', 'pengajuan', 'izin', 'users', 'about'];
+  sections.forEach(sec => {
+    const el = document.getElementById('page-' + sec);
+    if (el) el.classList.add('hidden');
+    const btn = document.getElementById('tab-' + sec);
+    if (btn) {
+      btn.classList.remove('text-brand-blue');
+      btn.classList.add('text-slate-400');
+    }
+  });
+
+  const activeSec = document.getElementById('page-' + tabId);
+  if (activeSec) activeSec.classList.remove('hidden');
+  const activeBtn = document.getElementById('tab-' + tabId);
+  if (activeBtn) {
+    activeBtn.classList.remove('text-slate-400');
+    activeBtn.classList.add('text-brand-blue');
+  }
+
+  const titles = {
+    keluarga: 'Data Keluarga & Anggota KK',
+    ronda: 'Jadwal Ronda Siskamling & Papan Informasi RT',
+    inputkas: 'Input Agenda Kegiatan & Transaksi Kas',
+    laporankas: 'Laporan Keuangan Kas Rukun Tetangga',
+    undangan: 'Pembuat Surat Undangan Digital Resmi RT',
+    pengajuan: 'Layanan Surat Pengajuan Warga',
+    izin: 'Permohonan Surat Izin RT',
+    users: 'Manajemen Akses & Hak Pengguna Akun',
+    about: 'About / Tentang Aplikasi SI-RT'
+  };
+  document.getElementById('sectionPageTitle').innerText = titles[tabId] || 'Sistem Informasi RT';
+}
+
+// Server Communication
+function loadDatabase() {
+  if (!(GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('http'))) {
+    loadLocalFallback();
+    return;
+  }
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'getAll', token: getToken() })
+  })
+    .then(res => res.json())
+    .then(resData => {
+      if (resData && resData.code === 'UNAUTHORIZED') {
+        alert(resData.error || 'Sesi berakhir. Silakan masuk kembali.');
+        handleLogout();
+        return;
+      }
+      if (resData && resData.success) {
+        dbData.keluarga = resData.keluarga || [];
+        dbData.ronda = resData.ronda || [];
+        dbData.pengumuman = resData.pengumuman || [];
+        dbData.kegiatan = resData.kegiatan || [];
+        dbData.kas = resData.kas || [];
+        dbData.undangan = resData.undangan || [];
+        dbData.pengajuan = resData.pengajuan || [];
+        dbData.izin = resData.izin || [];
+        dbData.users = resData.users || [];
+
+        // Role selalu mengikuti data server (konsisten setelah logout/login)
+        if (resData.me) {
+          const roleBerubah = !currentUser || currentUser.role !== resData.me.role;
+          currentUser = resData.me;
+          localStorage.setItem('sirt_current_user', JSON.stringify(currentUser));
+          if (roleBerubah) initAppSession();
+        }
+      }
+      renderAll();
+    })
+    .catch(() => {
+      loadLocalFallback();
+    });
+}
+
+function loadLocalFallback() {
+  dbData.keluarga = JSON.parse(localStorage.getItem('sirt_keluarga')) || dbData.keluarga;
+  dbData.ronda = JSON.parse(localStorage.getItem('sirt_ronda')) || dbData.ronda;
+  dbData.pengumuman = JSON.parse(localStorage.getItem('sirt_pengumuman')) || dbData.pengumuman;
+  dbData.kegiatan = JSON.parse(localStorage.getItem('sirt_kegiatan')) || dbData.kegiatan;
+  dbData.kas = JSON.parse(localStorage.getItem('sirt_kas')) || dbData.kas;
+  dbData.undangan = JSON.parse(localStorage.getItem('sirt_undangan')) || dbData.undangan;
+  dbData.pengajuan = JSON.parse(localStorage.getItem('sirt_pengajuan')) || dbData.pengajuan;
+  dbData.izin = JSON.parse(localStorage.getItem('sirt_izin')) || dbData.izin;
+  dbData.users = JSON.parse(localStorage.getItem('sirt_users')) || dbData.users;
+  renderAll();
+}
+
+function saveDataToServer(sheetName, item) {
+  if (sheetName === 'Keluarga') localStorage.setItem('sirt_keluarga', JSON.stringify(dbData.keluarga));
+  if (sheetName === 'JadwalRonda') localStorage.setItem('sirt_ronda', JSON.stringify(dbData.ronda));
+  if (sheetName === 'InfoWarga') localStorage.setItem('sirt_pengumuman', JSON.stringify(dbData.pengumuman));
+  if (sheetName === 'Kegiatan') localStorage.setItem('sirt_kegiatan', JSON.stringify(dbData.kegiatan));
+  if (sheetName === 'Kas') localStorage.setItem('sirt_kas', JSON.stringify(dbData.kas));
+  if (sheetName === 'Undangan') localStorage.setItem('sirt_undangan', JSON.stringify(dbData.undangan));
+  if (sheetName === 'SuratPengajuan') localStorage.setItem('sirt_pengajuan', JSON.stringify(dbData.pengajuan));
+  if (sheetName === 'SuratIzin') localStorage.setItem('sirt_izin', JSON.stringify(dbData.izin));
+  if (sheetName === 'Users') localStorage.setItem('sirt_users', JSON.stringify(dbData.users));
+
+  if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('http')) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save', token: getToken(), sheet: sheetName, data: item })
+    })
+      .then(res => res.json())
+      .then(d => {
+        if (d && !d.success) {
+          alert(d.error || 'Perubahan ditolak oleh server.');
+          loadDatabase();
+        }
+      })
+      .catch(e => console.log('Network sync fallback active'));
+  }
+  renderAll();
+}
+
+function deleteDataFromServer(sheetName, id) {
+  if (sheetName === 'Keluarga') localStorage.setItem('sirt_keluarga', JSON.stringify(dbData.keluarga));
+  if (sheetName === 'JadwalRonda') localStorage.setItem('sirt_ronda', JSON.stringify(dbData.ronda));
+  if (sheetName === 'InfoWarga') localStorage.setItem('sirt_pengumuman', JSON.stringify(dbData.pengumuman));
+  if (sheetName === 'Kegiatan') localStorage.setItem('sirt_kegiatan', JSON.stringify(dbData.kegiatan));
+  if (sheetName === 'Kas') localStorage.setItem('sirt_kas', JSON.stringify(dbData.kas));
+  if (sheetName === 'Undangan') localStorage.setItem('sirt_undangan', JSON.stringify(dbData.undangan));
+  if (sheetName === 'SuratPengajuan') localStorage.setItem('sirt_pengajuan', JSON.stringify(dbData.pengajuan));
+  if (sheetName === 'SuratIzin') localStorage.setItem('sirt_izin', JSON.stringify(dbData.izin));
+  if (sheetName === 'Users') localStorage.setItem('sirt_users', JSON.stringify(dbData.users));
+
+  if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('http')) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete', token: getToken(), sheet: sheetName, id: id })
+    })
+      .then(res => res.json())
+      .then(d => {
+        if (d && !d.success) {
+          alert(d.error || 'Penghapusan ditolak oleh server.');
+          loadDatabase();
+        }
+      })
+      .catch(e => console.log('Network delete fallback active'));
+  }
+}
+
+function syncData() {
+  const icon = document.getElementById('syncIcon');
+  if (icon) icon.classList.add('fa-spin');
+  loadDatabase();
+  setTimeout(() => {
+    if (icon) icon.classList.remove('fa-spin');
+    showNotification('Sinkronisasi Berhasil', 'Data disinkronkan dengan server.');
+  }, 800);
+}
+
+function renderAll() {
+  renderKeluarga();
+  renderPengumuman();
+  renderRonda();
+  renderKegiatan();
+  renderKasAndLaporan();
+  renderUndangan();
+  renderPengajuan();
+  renderIzin();
+  renderUsers();
+  updateNotifList();
+}
+
+function showNotification(title, message) {
+  const badge = document.getElementById('notifBadge');
+  if (badge) badge.classList.remove('hidden');
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body: message });
+  }
+
+  if (!dbData.notifList) dbData.notifList = [];
+  dbData.notifList.unshift({ title, message, time: timeWIB(new Date()).slice(0, 5) });
+  updateNotifList();
+}
+
+function updateNotifList() {
+  const listEl = document.getElementById('notifList');
+  if (!listEl) return;
+  const list = dbData.notifList || [];
+  if (list.length === 0) {
+    listEl.innerHTML = `<div class="p-4 text-center text-slate-400">Belum ada notifikasi baru</div>`;
+    return;
+  }
+  listEl.innerHTML = '';
+  list.forEach(n => {
+    listEl.innerHTML += `
+      <div class="p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+        <p class="font-bold text-slate-800 dark:text-white">${n.title}</p>
+        <p class="text-slate-600 dark:text-slate-300 text-[11px] mt-0.5">${n.message}</p>
+        <span class="text-[9px] text-slate-400 mt-1 block">${n.time}</span>
+      </div>
+    `;
+  });
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window) {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        alert('Notifikasi diizinkan!');
+      } else {
+        alert('Izin notifikasi ditolak.');
+      }
+    });
+  } else {
+    alert('Browser tidak mendukung notifikasi.');
+  }
+}
+
+function toggleNotifDropdown() {
+  const dropdown = document.getElementById('notifDropdown');
+  dropdown.classList.toggle('hidden');
+  const badge = document.getElementById('notifBadge');
+  if (badge) badge.classList.add('hidden');
+}
+
+function censorIdentifier(str) {
+  if (!str) return '****************';
+  const clean = String(str).replace(/'/g, '').trim();
+  if (clean.length <= 4) return '****';
+  return '****-****-****-' + clean.slice(-4);
+}
+
+// 1. KELUARGA & KK
+function renderKeluarga() {
+  const grid = document.getElementById('keluargaGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  const searchVal = document.getElementById('searchKKInput') ? document.getElementById('searchKKInput').value.toLowerCase() : '';
+  const filtered = dbData.keluarga.filter(k => 
+    (k.kepala_keluarga || '').toLowerCase().includes(searchVal) || 
+    String(k.nik_kk || k.no_kk || '').toLowerCase().includes(searchVal)
+  );
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-xs bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">Belum ada data Kartu Keluarga. Silakan masukkan data KK baru.</div>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  filtered.forEach(item => {
+    const anggotaCount = item.anggota ? item.anggota.length : 0;
+    const rawNikKk = String(item.nik_kk || item.no_kk || '').replace(/'/g,'');
+    const displayNikKk = isWarga ? censorIdentifier(rawNikKk) : rawNikKk;
+
+    grid.innerHTML += `
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-extrabold text-[10px] rounded-xl border border-blue-100 dark:border-blue-900 flex items-center gap-1">
+              <i class="fa-solid fa-id-card text-[11px]"></i> NIK KK: ${displayNikKk}
+            </span>
+            <span class="text-xs font-bold text-slate-400"><i class="fa-solid fa-users mr-1"></i>${anggotaCount} Jiwa</span>
+          </div>
+          <h4 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center justify-between">
+            <span>${item.kepala_keluarga}</span>
+            ${!isWarga ? `
+              <button onclick="openDetailKK('${rawNikKk}')" class="text-amber-500 hover:text-amber-600 text-xs p-1" title="Edit KK & Anggota">
+                <i class="fa-solid fa-pencil"></i>
+              </button>
+            ` : ''}
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-snug"><i class="fa-solid fa-location-dot mr-1.5 text-slate-400"></i>${item.alamat_lengkap || item.alamat || '-'}</p>
+        </div>
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <button onclick="openDetailKK('${rawNikKk}')" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+            <i class="fa-solid fa-users-viewfinder"></i> Lihat Anggota KK
+          </button>
+          ${!isWarga ? `
+            <button onclick="deleteKK('${rawNikKk}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition" title="Hapus KK">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  if (isWarga) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+  }
+}
+
+function filterKKList() {
+  renderKeluarga();
+}
+
+function handleCreateKKSubmit(e) {
+  e.preventDefault();
+  const nik_kk = "'" + document.getElementById('newNikKk').value.trim();
+  const kepala = document.getElementById('newNamaKepala').value.trim();
+  const alamat_lengkap = document.getElementById('newAlamat').value.trim();
+  const kepalaTtl = document.getElementById('newKepalaTtl').value.trim();
+  const kepalaJk = document.getElementById('newKepalaJk').value;
+  const kepalaPendidikan = document.getElementById('newKepalaPendidikan').value.trim();
+
+  if (dbData.keluarga.some(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === nik_kk.replace(/'/g,''))) {
+    alert('NIK KK tersebut sudah terdaftar!');
+    return;
+  }
+
+  const newFamily = {
+    id: 'k_' + Date.now(),
+    nik_kk: nik_kk,
+    kepala_keluarga: kepala,
+    alamat_lengkap: alamat_lengkap,
+    tanggal_update: tglWIB(new Date()),
+    anggota: [
+      { 
+        id: 'a_' + Date.now(), 
+        nama: kepala, 
+        nik: nik_kk, 
+        ttl: kepalaTtl, 
+        jk: kepalaJk, 
+        pendidikan: kepalaPendidikan, 
+        peran: 'Ayah', 
+        status: 'Aktif (Tinggal)' 
+      }
+    ]
+  };
+
+  dbData.keluarga.push(newFamily);
+  saveDataToServer('Keluarga', newFamily);
+  
+  document.getElementById('newNikKk').value = '';
+  document.getElementById('newNamaKepala').value = '';
+  document.getElementById('newAlamat').value = '';
+  document.getElementById('newKepalaTtl').value = '';
+  document.getElementById('newKepalaPendidikan').value = '';
+  showNotification('Data KK Ditambahkan', 'Kartu Keluarga atas nama ' + kepala + ' berhasil disimpan.');
+}
+
+let currentSelectedNikKk = null;
+function openDetailKK(nik_kk) {
+  currentSelectedNikKk = nik_kk;
+  const fam = dbData.keluarga.find(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === String(nik_kk).replace(/'/g,''));
+  if (!fam) return;
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+  const cleanNikKk = String(fam.nik_kk || fam.no_kk || '').replace(/'/g,'');
+  const displayNikKk = isWarga ? censorIdentifier(cleanNikKk) : cleanNikKk;
+
+  document.getElementById('modalKkTitle').innerText = 'KK: ' + displayNikKk + ' - ' + fam.kepala_keluarga;
+  document.getElementById('modalKkSubtitle').innerText = 'Alamat Lengkap: ' + (fam.alamat_lengkap || fam.alamat || '-');
+  document.getElementById('targetNikKk').value = cleanNikKk;
+
+  document.getElementById('editKkTargetOldNik').value = cleanNikKk;
+  document.getElementById('editKkNik').value = cleanNikKk;
+  document.getElementById('editKkNamaKepala').value = fam.kepala_keluarga;
+  document.getElementById('editKkAlamat').value = fam.alamat_lengkap || fam.alamat || '';
+  toggleEditKKForm(false);
+
+  resetAnggotaForm();
+  renderAnggotaTable(fam, isWarga);
+
+  if (isWarga) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+  }
+
+  document.getElementById('modalDetailKK').classList.remove('hidden');
+}
+
+function renderAnggotaTable(fam, isWarga) {
+  const tbody = document.getElementById('tableAnggotaBody');
+  tbody.innerHTML = '';
+
+  if (!fam.anggota || fam.anggota.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400 text-xs">Belum ada anggota keluarga terdaftar.</td></tr>`;
+    return;
+  }
+
+  fam.anggota.forEach(a => {
+    let badgeColor = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300';
+    if (a.status && a.status.includes('Pindah')) badgeColor = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300';
+    else if (a.status && a.status.includes('Meninggal')) badgeColor = 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
+
+    const rawNik = String(a.nik || '').replace(/'/g,'');
+    const displayNik = isWarga ? censorIdentifier(rawNik) : rawNik;
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+        <td class="p-2.5 font-bold text-slate-900 dark:text-white">${a.nama}</td>
+        <td class="p-2.5 font-mono text-slate-600 dark:text-slate-300">${displayNik}</td>
+        <td class="p-2.5 text-slate-600 dark:text-slate-300">${a.ttl || '-'}</td>
+        <td class="p-2.5 text-slate-600 dark:text-slate-300">${a.jk || '-'}</td>
+        <td class="p-2.5 text-slate-600 dark:text-slate-300">${a.pendidikan || '-'}</td>
+        <td class="p-2.5"><span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md font-semibold text-[10px]">${a.peran || 'Anggota'}</span></td>
+        <td class="p-2.5"><span class="px-2 py-0.5 ${badgeColor} rounded-md font-semibold text-[10px]">${a.status || 'Aktif'}</span></td>
+        <td class="p-2.5 text-right admin-only space-x-1">
+          <button onclick="editAnggota('${fam.nik_kk}', '${a.id}')" class="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg" title="Edit Anggota">
+            <i class="fa-solid fa-pencil text-xs"></i>
+          </button>
+          <button onclick="deleteAnggota('${fam.nik_kk}', '${a.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg" title="Hapus Anggota">
+            <i class="fa-solid fa-trash text-xs"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function toggleEditKKForm(show) {
+  const container = document.getElementById('formEditKKContainer');
+  if (show) container.classList.remove('hidden');
+  else container.classList.add('hidden');
+}
+
+function handleUpdateKKSubmit(e) {
+  e.preventDefault();
+  const oldNik = document.getElementById('editKkTargetOldNik').value;
+  const newNik = "'" + document.getElementById('editKkNik').value.trim();
+  const newNama = document.getElementById('editKkNamaKepala').value.trim();
+  const newAlamat = document.getElementById('editKkAlamat').value.trim();
+
+  const fam = dbData.keluarga.find(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === String(oldNik).replace(/'/g,''));
+  if (fam) {
+    fam.nik_kk = newNik;
+    fam.kepala_keluarga = newNama;
+    fam.alamat_lengkap = newAlamat;
+    fam.tanggal_update = tglWIB(new Date());
+
+    saveDataToServer('Keluarga', fam);
+    toggleEditKKForm(false);
+    openDetailKK(newNik);
+    showNotification('KK Diperbarui', 'Informasi Kartu Keluarga berhasil diperbarui.');
+  }
+}
+
+function editAnggota(nik_kk, anggotaId) {
+  const fam = dbData.keluarga.find(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === String(nik_kk).replace(/'/g,''));
+  if (!fam || !fam.anggota) return;
+
+  const a = fam.anggota.find(x => x.id === anggotaId);
+  if (!a) return;
+
+  document.getElementById('editAnggotaId').value = a.id;
+  document.getElementById('anggotaNama').value = a.nama;
+  document.getElementById('anggotaNik').value = String(a.nik || '').replace(/'/g,'');
+  document.getElementById('anggotaTtl').value = a.ttl || '';
+  document.getElementById('anggotaJk').value = a.jk || 'L';
+  document.getElementById('anggotaPendidikan').value = a.pendidikan || '';
+  document.getElementById('anggotaPeran').value = a.peran || 'Anak';
+  document.getElementById('anggotaStatus').value = a.status || 'Aktif (Tinggal)';
+
+  document.getElementById('formAnggotaHeader').innerHTML = '<i class="fa-solid fa-pencil text-amber-500"></i> Edit Data Anggota Keluarga';
+  document.getElementById('btnSubmitAnggota').innerText = 'Update Data Anggota';
+  document.getElementById('btnCancelEditAnggota').classList.remove('hidden');
+}
+
+function resetAnggotaForm() {
+  document.getElementById('editAnggotaId').value = '';
+  document.getElementById('anggotaNama').value = '';
+  document.getElementById('anggotaNik').value = '';
+  document.getElementById('anggotaTtl').value = '';
+  document.getElementById('anggotaJk').value = 'L';
+  document.getElementById('anggotaPendidikan').value = '';
+  document.getElementById('anggotaPeran').value = 'Anak';
+  document.getElementById('anggotaStatus').value = 'Aktif (Tinggal)';
+
+  document.getElementById('formAnggotaHeader').innerHTML = '<i class="fa-solid fa-user-plus text-blue-600"></i> Tambah Anggota Keluarga / KTP Baru';
+  document.getElementById('btnSubmitAnggota').innerText = 'Simpan Anggota Keluarga';
+  document.getElementById('btnCancelEditAnggota').classList.add('hidden');
+}
+
+function handleSaveAnggotaSubmit(e) {
+  e.preventDefault();
+  const nik_kk = document.getElementById('targetNikKk').value;
+  const editId = document.getElementById('editAnggotaId').value;
+  const fam = dbData.keluarga.find(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === String(nik_kk).replace(/'/g,''));
+
+  if (!fam) return;
+  if (!fam.anggota) fam.anggota = [];
+
+  const newAnggota = {
+    id: editId || ('a_' + Date.now()),
+    nama: document.getElementById('anggotaNama').value.trim(),
+    nik: "'" + document.getElementById('anggotaNik').value.trim(),
+    ttl: document.getElementById('anggotaTtl').value.trim(),
+    jk: document.getElementById('anggotaJk').value,
+    pendidikan: document.getElementById('anggotaPendidikan').value.trim(),
+    peran: document.getElementById('anggotaPeran').value,
+    status: document.getElementById('anggotaStatus').value
+  };
+
+  if (editId) {
+    const idx = fam.anggota.findIndex(x => x.id === editId);
+    if (idx !== -1) fam.anggota[idx] = newAnggota;
+  } else {
+    fam.anggota.push(newAnggota);
+  }
+
+  fam.tanggal_update = tglWIB(new Date());
+  saveDataToServer('Keluarga', fam);
+  openDetailKK(nik_kk);
+  resetAnggotaForm();
+}
+
+function deleteAnggota(nik_kk, anggotaId) {
+  if (!confirm('Apakah Anda yakin ingin menghapus anggota keluarga ini?')) return;
+  const fam = dbData.keluarga.find(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') === String(nik_kk).replace(/'/g,''));
+  if (!fam || !fam.anggota) return;
+
+  fam.anggota = fam.anggota.filter(x => x.id !== anggotaId);
+  saveDataToServer('Keluarga', fam);
+  openDetailKK(nik_kk);
+}
+
+function deleteKK(nik_kk) {
+  if (!confirm('Hapus seluruh data Kartu Keluarga ini? Seluruh data anggota keluarga akan ikut terhapus.')) return;
+  const targetId = String(nik_kk).replace(/'/g,'');
+  dbData.keluarga = dbData.keluarga.filter(k => String(k.nik_kk || k.no_kk || '').replace(/'/g,'') !== targetId);
+  deleteDataFromServer('Keluarga', targetId);
+  renderKeluarga();
+}
+
+// 2. PENGUMUMAN & RONDA
+function renderPengumuman() {
+  const grid = document.getElementById('pengumumanGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  if (dbData.pengumuman.length === 0) {
+    grid.innerHTML = `<div class="col-span-full py-6 text-center text-slate-400 text-xs">Belum ada informasi pengumuman.</div>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  dbData.pengumuman.forEach(p => {
+    grid.innerHTML += `
+      <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700 space-y-2 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded-md text-[10px] font-bold">${p.kategori_info || 'Pengumuman'}</span>
+            <span class="text-[10px] text-slate-400">${fmtTgl(p.tanggal_info)}</span>
+          </div>
+          <h4 class="font-bold text-sm text-white">${p.judul_info}</h4>
+          <p class="text-xs text-slate-300 mt-1 leading-relaxed">${p.isi_info}</p>
+        </div>
+        ${!isWarga ? `
+        <div class="pt-2 border-t border-slate-700/60 flex justify-end gap-2 admin-only">
+          <button onclick="editPengumuman('${p.id}')" class="p-1.5 text-amber-400 hover:bg-slate-700 rounded-lg text-xs" title="Edit Pengumuman">
+            <i class="fa-solid fa-pencil"></i>
+          </button>
+          <button onclick="deletePengumuman('${p.id}')" class="p-1.5 text-rose-400 hover:bg-slate-700 rounded-lg text-xs" title="Hapus Pengumuman">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  });
+}
+
+function handleSavePengumumanSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editInfoId').value;
+  const newItem = {
+    id: id || ('p_' + Date.now()),
+    judul_info: document.getElementById('infoJudul').value.trim(),
+    kategori_info: document.getElementById('infoKategori').value,
+    isi_info: document.getElementById('infoIsi').value.trim(),
+    tanggal_info: tglWIB(new Date())
+  };
+
+  if (id) {
+    const idx = dbData.pengumuman.findIndex(x => x.id === id);
+    if (idx !== -1) dbData.pengumuman[idx] = newItem;
+  } else {
+    dbData.pengumuman.unshift(newItem);
+  }
+
+  saveDataToServer('InfoWarga', newItem);
+  resetPengumumanForm();
+  showNotification('Informasi Disiarkan', 'Pengumuman "' + newItem.judul_info + '" berhasil diterbitkan.');
+}
+
+function editPengumuman(id) {
+  const item = dbData.pengumuman.find(x => x.id === id);
+  if (!item) return;
+
+  document.getElementById('editInfoId').value = item.id;
+  document.getElementById('infoJudul').value = item.judul_info;
+  document.getElementById('infoKategori').value = item.kategori_info || 'Pengumuman Umum';
+  document.getElementById('infoIsi').value = item.isi_info;
+
+  document.getElementById('formPengumumanHeader').innerHTML = '<i class="fa-solid fa-pencil text-amber-400"></i> Edit Informasi Custom';
+  document.getElementById('btnSubmitInfo').innerHTML = '<i class="fa-solid fa-save text-xs"></i> Update Informasi';
+  document.getElementById('btnCancelInfo').classList.remove('hidden');
+}
+
+function resetPengumumanForm() {
+  document.getElementById('editInfoId').value = '';
+  document.getElementById('infoJudul').value = '';
+  document.getElementById('infoIsi').value = '';
+  document.getElementById('formPengumumanHeader').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Buat & Terbitkan Informasi Custom Baru';
+  document.getElementById('btnSubmitInfo').innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Siarkan Informasi Sekarang';
+  document.getElementById('btnCancelInfo').classList.add('hidden');
+}
+
+function deletePengumuman(id) {
+  if (!confirm('Hapus informasi pengumuman ini?')) return;
+  dbData.pengumuman = dbData.pengumuman.filter(x => x.id !== id);
+  deleteDataFromServer('InfoWarga', id);
+  renderPengumuman();
+}
+
+// RONDA
+function renderRonda() {
+  const grid = document.getElementById('rondaGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  if (dbData.ronda.length === 0) {
+    grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-xs">Belum ada jadwal ronda siskamling.</div>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  dbData.ronda.forEach(r => {
+    grid.innerHTML += `
+      <div class="bg-slate-50 dark:bg-slate-700/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-3 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold">${r.hari || '-'}</span>
+            <span class="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-300"><i class="fa-regular fa-clock mr-1"></i>${r.waktu || '21.00 - 03.00 WIB'}</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-slate-900 dark:text-white">${r.pos || 'Pos Ronda'}</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300"><i class="fa-solid fa-user-shield text-blue-500 mr-1"></i><strong>Petugas:</strong> ${r.petugas || '-'}</p>
+          ${r.pengganti && r.pengganti !== '-' ? `<p class="text-[11px] text-amber-600 dark:text-amber-400"><i class="fa-solid fa-user-pen mr-1"></i><strong>Pengganti:</strong> ${r.pengganti}</p>` : ''}
+        </div>
+        ${!isWarga ? `
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-600/80 flex justify-end gap-1 admin-only">
+          <button onclick="editRonda('${r.id}')" class="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg text-xs" title="Edit Jadwal">
+            <i class="fa-solid fa-pencil"></i>
+          </button>
+          <button onclick="deleteRonda('${r.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-xs" title="Hapus Jadwal">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  });
+}
+
+function openAddRondaModal() {
+  document.getElementById('editRondaId').value = '';
+  document.getElementById('editRondaPos').value = '';
+  document.getElementById('editRondaHari').value = '';
+  document.getElementById('editRondaWaktu').value = '21.00 - 03.00 WIB';
+  document.getElementById('editRondaPetugas').value = '';
+  document.getElementById('editRondaPengganti').value = '';
+  document.getElementById('modalRondaTitle').innerText = 'Tambah Jadwal Ronda Baru';
+  document.getElementById('modalEditRonda').classList.remove('hidden');
+}
+
+function editRonda(id) {
+  const r = dbData.ronda.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('editRondaId').value = r.id;
+  document.getElementById('editRondaPos').value = r.pos || '';
+  document.getElementById('editRondaHari').value = r.hari || '';
+  document.getElementById('editRondaWaktu').value = r.waktu || '21.00 - 03.00 WIB';
+  document.getElementById('editRondaPetugas').value = r.petugas || '';
+  document.getElementById('editRondaPengganti').value = r.pengganti || '';
+
+  document.getElementById('modalRondaTitle').innerText = 'Edit Jadwal Ronda';
+  document.getElementById('modalEditRonda').classList.remove('hidden');
+}
+
+function handleSaveRondaSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editRondaId').value;
+  const newItem = {
+    id: id || ('r_' + Date.now()),
+    pos: document.getElementById('editRondaPos').value.trim(),
+    hari: document.getElementById('editRondaHari').value.trim(),
+    waktu: document.getElementById('editRondaWaktu').value.trim(),
+    petugas: document.getElementById('editRondaPetugas').value.trim(),
+    pengganti: document.getElementById('editRondaPengganti').value.trim() || '-'
+  };
+
+  if (id) {
+    const idx = dbData.ronda.findIndex(x => x.id === id);
+    if (idx !== -1) dbData.ronda[idx] = newItem;
+  } else {
+    dbData.ronda.push(newItem);
+  }
+
+  saveDataToServer('JadwalRonda', newItem);
+  closeModal('modalEditRonda');
+}
+
+function deleteRonda(id) {
+  if (!confirm('Hapus jadwal ronda ini?')) return;
+  dbData.ronda = dbData.ronda.filter(x => x.id !== id);
+  deleteDataFromServer('JadwalRonda', id);
+  renderRonda();
+}
+
+// 3. KEGIATAN & KAS
+function renderKegiatan() {
+  const tbody = document.getElementById('tableKegiatanBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (dbData.kegiatan.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 text-xs">Belum ada agenda kegiatan terdaftar.</td></tr>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  dbData.kegiatan.forEach(k => {
+    let badge = 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300';
+    if (k.status === 'Selesai Dilaksanakan') badge = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300';
+    else if (k.status === 'Menunggu Konfirmasi') badge = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300';
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+        <td class="p-3 font-mono text-slate-600 dark:text-slate-300">${fmtTgl(k.tanggal)}</td>
+        <td class="p-3 font-bold text-slate-900 dark:text-white">${k.judul}</td>
+        <td class="p-3"><span class="px-2.5 py-1 ${badge} rounded-lg text-[10px] font-bold">${k.status}</span></td>
+        <td class="p-3 text-slate-600 dark:text-slate-300">${k.keterangan || '-'}</td>
+        ${!isWarga ? `
+        <td class="p-3 text-right admin-only space-x-1">
+          <button onclick="editKegiatan('${k.id}')" class="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg text-xs" title="Edit Agenda">
+            <i class="fa-solid fa-pencil"></i>
+          </button>
+          <button onclick="deleteKegiatan('${k.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg text-xs" title="Hapus Agenda">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+        ` : ''}
+      </tr>
+    `;
+  });
+}
+
+function handleSaveKegiatanSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editKegiatanId').value;
+  const newItem = {
+    id: id || ('k_' + Date.now()),
+    judul: document.getElementById('kegiatanJudul').value.trim(),
+    tanggal: document.getElementById('kegiatanTanggal').value,
+    status: document.getElementById('kegiatanStatus').value,
+    keterangan: document.getElementById('kegiatanKeterangan').value.trim()
+  };
+
+  if (id) {
+    const idx = dbData.kegiatan.findIndex(x => x.id === id);
+    if (idx !== -1) dbData.kegiatan[idx] = newItem;
+  } else {
+    dbData.kegiatan.unshift(newItem);
+  }
+
+  saveDataToServer('Kegiatan', newItem);
+  resetKegiatanForm();
+  showNotification('Agenda Ditambahkan', 'Agenda ' + newItem.judul + ' berhasil disimpan.');
+}
+
+function editKegiatan(id) {
+  const k = dbData.kegiatan.find(x => x.id === id);
+  if (!k) return;
+
+  document.getElementById('editKegiatanId').value = k.id;
+  document.getElementById('kegiatanJudul').value = k.judul;
+  document.getElementById('kegiatanTanggal').value = k.tanggal || '';
+  document.getElementById('kegiatanStatus').value = k.status || 'Disetujui RT';
+  document.getElementById('kegiatanKeterangan').value = k.keterangan || '';
+
+  document.getElementById('formKegiatanHeader').innerText = 'Edit Agenda Kegiatan RT';
+  document.getElementById('btnSubmitKegiatan').innerHTML = '<i class="fa-solid fa-save mr-1"></i> Update Agenda';
+  document.getElementById('btnCancelKegiatan').classList.remove('hidden');
+}
+
+function resetKegiatanForm() {
+  document.getElementById('editKegiatanId').value = '';
+  document.getElementById('kegiatanJudul').value = '';
+  document.getElementById('kegiatanTanggal').value = '';
+  document.getElementById('kegiatanKeterangan').value = '';
+  document.getElementById('formKegiatanHeader').innerText = 'Input Agenda Kegiatan RT';
+  document.getElementById('btnSubmitKegiatan').innerHTML = '<i class="fa-solid fa-plus mr-1"></i> Tambah Agenda Kegiatan';
+  document.getElementById('btnCancelKegiatan').classList.add('hidden');
+}
+
+function deleteKegiatan(id) {
+  if (!confirm('Hapus agenda kegiatan ini?')) return;
+  dbData.kegiatan = dbData.kegiatan.filter(x => x.id !== id);
+  deleteDataFromServer('Kegiatan', id);
+  renderKegiatan();
+}
+
+// KAS & LAPORAN
+function renderKasAndLaporan() {
+  const tbody = document.getElementById('tableLaporanKasBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  let totalMasuk = 0;
+  let totalKeluar = 0;
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  if (dbData.kas.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Belum ada transaksi kas terdaftar.</td></tr>`;
+  } else {
+    dbData.kas.forEach(ks => {
+      const nom = parseFloat(ks.nominal || 0);
+      const isMasuk = ks.tipe === 'pemasukan';
+      if (isMasuk) totalMasuk += nom;
+      else totalKeluar += nom;
+
+      tbody.innerHTML += `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+          <td class="p-3 font-mono text-slate-600 dark:text-slate-300">${fmtTgl(ks.tanggal)}</td>
+          <td class="p-3 font-bold text-slate-900 dark:text-white">${ks.keterangan}</td>
+          <td class="p-3 text-slate-600 dark:text-slate-300">${ks.pembayar || '-'}</td>
+          <td class="p-3 text-right font-bold text-emerald-600 dark:text-emerald-400">${isMasuk ? 'Rp ' + nom.toLocaleString('id-ID') : '-'}</td>
+          <td class="p-3 text-right font-bold text-rose-600 dark:text-rose-400">${!isMasuk ? 'Rp ' + nom.toLocaleString('id-ID') : '-'}</td>
+          ${!isWarga ? `
+          <td class="p-3 text-right no-print admin-only space-x-1">
+            <button onclick="editKas('${ks.id}')" class="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg text-xs" title="Edit Kas">
+              <i class="fa-solid fa-pencil"></i>
+            </button>
+            <button onclick="deleteKas('${ks.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg text-xs" title="Hapus Kas">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+          ` : ''}
+        </tr>
+      `;
+    });
+  }
+
+  const saldo = totalMasuk - totalKeluar;
+  document.getElementById('statTotalMasuk').innerText = 'Rp ' + totalMasuk.toLocaleString('id-ID');
+  document.getElementById('statTotalKeluar').innerText = 'Rp ' + totalKeluar.toLocaleString('id-ID');
+  document.getElementById('statSaldoAkhir').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
+}
+
+function handleSaveKasSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editKasId').value;
+  const newItem = {
+    id: id || ('ks_' + Date.now()),
+    tanggal: document.getElementById('kasTanggal').value,
+    tipe: document.getElementById('kasTipe').value,
+    nominal: parseFloat(document.getElementById('kasNominal').value || 0),
+    pembayar: document.getElementById('kasPembayar').value.trim(),
+    keterangan: document.getElementById('kasKeterangan').value.trim()
+  };
+
+  if (id) {
+    const idx = dbData.kas.findIndex(x => x.id === id);
+    if (idx !== -1) dbData.kas[idx] = newItem;
+  } else {
+    dbData.kas.unshift(newItem);
+  }
+
+  saveDataToServer('Kas', newItem);
+  resetKasForm();
+  showNotification('Transaksi Kas Disimpan', 'Pencatatan kas berhasil diperbarui.');
+}
+
+function editKas(id) {
+  const ks = dbData.kas.find(x => x.id === id);
+  if (!ks) return;
+
+  document.getElementById('editKasId').value = ks.id;
+  document.getElementById('kasTanggal').value = ks.tanggal || '';
+  document.getElementById('kasTipe').value = ks.tipe || 'pemasukan';
+  document.getElementById('kasNominal').value = ks.nominal || '';
+  document.getElementById('kasPembayar').value = ks.pembayar || '';
+  document.getElementById('kasKeterangan').value = ks.keterangan || '';
+
+  document.getElementById('formKasHeader').innerText = 'Edit Transaksi Kas Warga';
+  document.getElementById('btnSubmitKas').innerHTML = '<i class="fa-solid fa-save mr-1"></i> Update Transaksi Kas';
+  document.getElementById('btnCancelKas').classList.remove('hidden');
+}
+
+function resetKasForm() {
+  document.getElementById('editKasId').value = '';
+  document.getElementById('kasTanggal').value = '';
+  document.getElementById('kasNominal').value = '';
+  document.getElementById('kasPembayar').value = '';
+  document.getElementById('kasKeterangan').value = '';
+  document.getElementById('formKasHeader').innerText = 'Input Transaksi Kas Warga';
+  document.getElementById('btnSubmitKas').innerHTML = '<i class="fa-solid fa-save mr-1"></i> Catat Transaksi Kas';
+  document.getElementById('btnCancelKas').classList.add('hidden');
+}
+
+function deleteKas(id) {
+  if (!confirm('Hapus catatan transaksi kas ini?')) return;
+  dbData.kas = dbData.kas.filter(x => x.id !== id);
+  deleteDataFromServer('Kas', id);
+  renderKasAndLaporan();
+}
+
+// 4. UNDANGAN
+function renderUndangan() {
+  const container = document.getElementById('suratPreviewContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (dbData.undangan.length === 0) {
+    container.innerHTML = `<div class="py-12 text-center text-slate-400 text-xs bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">Belum ada format undangan dibuat. Silakan klik "Surat Baru" untuk membuat.</div>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  dbData.undangan.forEach(u => {
+    container.innerHTML += `
+      <div class="printable-area bg-white text-slate-900 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-md space-y-6 max-w-3xl mx-auto relative">
+        ${!isWarga ? `
+        <div class="admin-only no-print absolute top-4 right-4 flex gap-2">
+          <button onclick="editUndangan('${u.id}')" class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl text-xs font-bold" title="Edit Surat"><i class="fa-solid fa-pencil mr-1"></i> Edit</button>
+          <button onclick="deleteUndangan('${u.id}')" class="p-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-xl text-xs font-bold" title="Hapus Surat"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
+        </div>
+        ` : ''}
+
+        <div class="border-b-2 border-slate-900 pb-4 text-center space-y-1">
+          <div class="flex justify-center items-center gap-3 mb-2">
+            <img src="${LOGO_RT}" alt="Logo RT" class="w-12 h-12 object-contain">
+          </div>
+          <h2 class="text-xl font-extrabold uppercase tracking-wide text-slate-900">${u.kop}</h2>
+          <p class="text-xs text-slate-600">Sistem Administrasi Persuratan Digital Rukun Tetangga</p>
+        </div>
+
+        <div class="flex justify-between text-xs font-medium text-slate-700 pt-2">
+          <div>
+            <p><strong>Nomor:</strong> ${u.nomor}</p>
+            <p><strong>Lampiran:</strong> -</p>
+            <p><strong>Hal:</strong> Undangan Rapat / Kegiatan RT</p>
+          </div>
+          <div class="text-right">
+            <p>${fmtTgl(u.tanggal)}</p>
+          </div>
+        </div>
+
+        <div class="text-xs space-y-1 pt-2">
+          <p>Kepada Yth.</p>
+          <p class="font-bold text-slate-900">${u.tujuan}</p>
+          <p>di Tempat</p>
+        </div>
+
+        <div class="text-xs leading-relaxed space-y-3 text-slate-800">
+          <p>Dengan hormat,</p>
+          <p>${u.isi}</p>
+          <p>Demikian surat undangan ini kami sampaikan. Atas perhatian dan kehadiran Bapak/Ibu/Saudara sekalian, kami ucapkan terima kasih.</p>
+        </div>
+
+        <div class="pt-8 flex justify-end text-xs text-center">
+          <div class="space-y-12">
+            <p>Hormat kami,<br><strong>${u.penandatangan}</strong></p>
+            <p class="font-bold underline text-slate-900">( Pengurus RT )</p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function openUndanganModal() {
+  document.getElementById('editUndanganId').value = '';
+  document.getElementById('undanganKop').value = 'PENGURUS RUKUN TETANGGA 01';
+  document.getElementById('undanganNomor').value = '001/RT-01/' + new Date().getFullYear();
+  document.getElementById('undanganTanggal').value = tglWIB(new Date());
+  document.getElementById('undanganTujuan').value = 'Seluruh Warga RT 01';
+  document.getElementById('undanganIsi').value = 'Mengharap dengan hormat kehadiran Bapak/Ibu/Saudara dalam acara Rapat Rutin Warga.';
+  document.getElementById('undanganPenandatangan').value = 'Ketua RT 01';
+
+  document.getElementById('modalUndanganTitle').innerText = 'Buat Surat Undangan Baru';
+  document.getElementById('modalUndangan').classList.remove('hidden');
+}
+
+function editUndangan(id) {
+  const u = dbData.undangan.find(x => x.id === id);
+  if (!u) return;
+
+  document.getElementById('editUndanganId').value = u.id;
+  document.getElementById('undanganKop').value = u.kop || '';
+  document.getElementById('undanganNomor').value = u.nomor || '';
+  document.getElementById('undanganTanggal').value = u.tanggal || '';
+  document.getElementById('undanganTujuan').value = u.tujuan || '';
+  document.getElementById('undanganIsi').value = u.isi || '';
+  document.getElementById('undanganPenandatangan').value = u.penandatangan || '';
+
+  document.getElementById('modalUndanganTitle').innerText = 'Edit Surat Undangan';
+  document.getElementById('modalUndangan').classList.remove('hidden');
+}
+
+function handleSaveUndanganSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editUndanganId').value;
+  const newItem = {
+    id: id || ('u_' + Date.now()),
+    kop: document.getElementById('undanganKop').value.trim(),
+    nomor: document.getElementById('undanganNomor').value.trim(),
+    tanggal: document.getElementById('undanganTanggal').value.trim(),
+    tujuan: document.getElementById('undanganTujuan').value.trim(),
+    isi: document.getElementById('undanganIsi').value.trim(),
+    penandatangan: document.getElementById('undanganPenandatangan').value.trim()
+  };
+
+  if (id) {
+    const idx = dbData.undangan.findIndex(x => x.id === id);
+    if (idx !== -1) dbData.undangan[idx] = newItem;
+  } else {
+    dbData.undangan.unshift(newItem);
+  }
+
+  saveDataToServer('Undangan', newItem);
+  closeModal('modalUndangan');
+}
+
+function deleteUndangan(id) {
+  if (!confirm('Hapus surat undangan ini?')) return;
+  dbData.undangan = dbData.undangan.filter(x => x.id !== id);
+  deleteDataFromServer('Undangan', id);
+  renderUndangan();
+}
+
+// 5. SURAT PENGAJUAN WARGA
+function renderPengajuan() {
+  const tbody = document.getElementById('tablePengajuanBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const list = (dbData.pengajuan || []).filter(canViewOwned);
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 text-xs">Belum ada data pengajuan surat warga.</td></tr>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  list.forEach(p => {
+    let badge = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300';
+    if (p.status === 'Disetujui') badge = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300';
+    else if (p.status === 'Ditolak') badge = 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300';
+
+    const displayNik = isWarga ? censorIdentifier(p.nik) : String(p.nik || '').replace(/'/g,'');
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+        <td class="p-3 text-slate-600 dark:text-slate-300 font-mono">${fmtTgl(p.tanggal)}</td>
+        <td class="p-3 font-bold text-slate-900 dark:text-white">${p.nama_pemohon}</td>
+        <td class="p-3 font-mono text-slate-600 dark:text-slate-300">${displayNik}</td>
+        <td class="p-3 text-slate-700 dark:text-slate-200 font-semibold">${p.jenis_surat}</td>
+        <td class="p-3 text-slate-600 dark:text-slate-300">${p.keperluan}</td>
+        <td class="p-3"><span class="px-2.5 py-1 ${badge} rounded-lg text-[10px] font-bold">${p.status || 'Diproses'}</span></td>
+        <td class="p-3 text-right space-x-1">
+          ${!isWarga ? `
+            <button onclick="updateStatusPengajuan('${p.id}', 'Disetujui')" class="px-2 py-1 bg-emerald-600 text-white rounded text-[10px] font-bold">Setujui</button>
+            <button onclick="updateStatusPengajuan('${p.id}', 'Ditolak')" class="px-2 py-1 bg-rose-600 text-white rounded text-[10px] font-bold">Tolak</button>
+            <button onclick="deletePengajuan('${p.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          ` : `
+            <button onclick="deletePengajuan('${p.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Batalkan Pengajuan"><i class="fa-solid fa-trash"></i></button>
+          `}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function openPengajuanModal() {
+  document.getElementById('pengajuanId').value = '';
+  document.getElementById('pengajuanNama').value = currentUser ? currentUser.nama_lengkap : '';
+  document.getElementById('pengajuanNik').value = '';
+  document.getElementById('pengajuanKeperluan').value = '';
+  document.getElementById('modalPengajuan').classList.remove('hidden');
+}
+
+function handleSavePengajuanSubmit(e) {
+  e.preventDefault();
+  const newItem = {
+    id: 'pg_' + Date.now(),
+    owner_id: currentUser ? String(currentUser.id) : '',
+    nama_pemohon: document.getElementById('pengajuanNama').value.trim(),
+    nik: "'" + document.getElementById('pengajuanNik').value.trim(),
+    jenis_surat: document.getElementById('pengajuanJenis').value,
+    keperluan: document.getElementById('pengajuanKeperluan').value.trim(),
+    tanggal: tglWIB(new Date()),
+    status: 'Diproses'
+  };
+
+  if (!dbData.pengajuan) dbData.pengajuan = [];
+  dbData.pengajuan.unshift(newItem);
+  saveDataToServer('SuratPengajuan', newItem);
+  closeModal('modalPengajuan');
+  showNotification('Pengajuan Terkirim', 'Surat pengajuan Anda telah dikirim ke pengurus RT.');
+}
+
+function updateStatusPengajuan(id, status) {
+  const item = dbData.pengajuan.find(x => x.id === id);
+  if (!item) return;
+  item.status = status;
+  saveDataToServer('SuratPengajuan', item);
+  showNotification('Status Pengajuan Updated', 'Status pengajuan kini: ' + status);
+}
+
+function deletePengajuan(id) {
+  if (!confirm('Hapus surat pengajuan ini?')) return;
+  dbData.pengajuan = dbData.pengajuan.filter(x => x.id !== id);
+  deleteDataFromServer('SuratPengajuan', id);
+  renderPengajuan();
+}
+
+// 6. SURAT IZIN RT
+function renderIzin() {
+  const tbody = document.getElementById('tableIzinBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const list = (dbData.izin || []).filter(canViewOwned);
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Belum ada permohonan izin RT terdaftar.</td></tr>`;
+    return;
+  }
+
+  const isWarga = currentUser && currentUser.role === 'warga';
+
+  list.forEach(iz => {
+    let badge = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300';
+    if (iz.status === 'Disetujui') badge = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300';
+    else if (iz.status === 'Ditolak') badge = 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300';
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+        <td class="p-3 font-bold text-slate-900 dark:text-white">${iz.nama_pemohon}</td>
+        <td class="p-3 font-semibold text-slate-700 dark:text-slate-200">${iz.jenis_izin}</td>
+        <td class="p-3 text-slate-600 dark:text-slate-300">${iz.alasan}</td>
+        <td class="p-3 text-slate-600 dark:text-slate-300 font-mono">${fmtTgl(iz.tanggal_mulai)} s/d ${fmtTgl(iz.tanggal_selesai)}</td>
+        <td class="p-3"><span class="px-2.5 py-1 ${badge} rounded-lg text-[10px] font-bold">${iz.status || 'Diproses'}</span></td>
+        <td class="p-3 text-right space-x-1">
+          ${!isWarga ? `
+            <button onclick="updateStatusIzin('${iz.id}', 'Disetujui')" class="px-2 py-1 bg-emerald-600 text-white rounded text-[10px] font-bold">Setujui</button>
+            <button onclick="updateStatusIzin('${iz.id}', 'Ditolak')" class="px-2 py-1 bg-rose-600 text-white rounded text-[10px] font-bold">Tolak</button>
+            <button onclick="deleteIzin('${iz.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          ` : `
+            <button onclick="deleteIzin('${iz.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Batalkan Permohonan Izin"><i class="fa-solid fa-trash"></i></button>
+          `}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function openIzinModal() {
+  document.getElementById('izinId').value = '';
+  document.getElementById('izinNama').value = currentUser ? currentUser.nama_lengkap : '';
+  document.getElementById('izinAlasan').value = '';
+  document.getElementById('modalIzin').classList.remove('hidden');
+}
+
+function handleSaveIzinSubmit(e) {
+  e.preventDefault();
+  const newItem = {
+    id: 'iz_' + Date.now(),
+    owner_id: currentUser ? String(currentUser.id) : '',
+    nama_pemohon: document.getElementById('izinNama').value.trim(),
+    jenis_izin: document.getElementById('izinJenis').value,
+    alasan: document.getElementById('izinAlasan').value.trim(),
+    tanggal_mulai: document.getElementById('izinTglMulai').value,
+    tanggal_selesai: document.getElementById('izinTglSelesai').value,
+    status: 'Diproses'
+  };
+
+  if (!dbData.izin) dbData.izin = [];
+  dbData.izin.unshift(newItem);
+  saveDataToServer('SuratIzin', newItem);
+  closeModal('modalIzin');
+  showNotification('Izin Terkirim', 'Permohonan izin Anda telah berhasil diajukan.');
+}
+
+function updateStatusIzin(id, status) {
+  const item = dbData.izin.find(x => x.id === id);
+  if (!item) return;
+  item.status = status;
+  saveDataToServer('SuratIzin', item);
+  showNotification('Status Izin Updated', 'Status permohonan izin kini: ' + status);
+}
+
+function deleteIzin(id) {
+  if (!confirm('Hapus permohonan izin ini?')) return;
+  dbData.izin = dbData.izin.filter(x => x.id !== id);
+  deleteDataFromServer('SuratIzin', id);
+  renderIzin();
+}
+
+// 7. MANAJEMEN USERS
+function renderUsers() {
+  const tbody = document.getElementById('tableUsersBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  dbData.users.forEach(u => {
+    const isMainAdmin = String(u.username).replace(/'/g,'') === 'admin';
+    const roleBadge = u.role === 'admin' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200';
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+        <td class="p-3 font-bold text-slate-900 dark:text-white">${u.nama_lengkap}</td>
+        <td class="p-3 font-mono text-slate-600 dark:text-slate-300">${String(u.username).replace(/'/g,'')}</td>
+        <td class="p-3"><span class="px-2.5 py-1 ${roleBadge} rounded-lg text-[10px] font-extrabold tracking-wider uppercase">${u.role}</span></td>
+        <td class="p-3 text-right space-x-1">
+          ${isMainAdmin ? '<span class="text-[10px] text-slate-400 italic">Admin Utama</span>' : `
+            <button onclick="toggleUserRole('${u.id}')" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition">
+              <i class="fa-solid fa-user-gear mr-1"></i> Ubah ke ${u.role === 'admin' ? 'Warga' : 'Admin'}
+            </button>
+            <button onclick="deleteUser('${u.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg text-xs" title="Hapus Akun">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          `}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function toggleUserRole(userId) {
+  const u = dbData.users.find(x => x.id === userId);
+  if (!u) return;
+
+  u.role = u.role === 'admin' ? 'warga' : 'admin';
+  saveDataToServer('Users', u);
+  showNotification('Akses Pengguna Diubah', 'Hak akses ' + u.nama_lengkap + ' diubah menjadi ' + u.role.toUpperCase());
+}
+
+function deleteUser(userId) {
+  if (!confirm('Hapus akun pengguna ini?')) return;
+  dbData.users = dbData.users.filter(x => x.id !== userId);
+  deleteDataFromServer('Users', userId);
+  renderUsers();
+}
+</script>
+</body>
+</html>
